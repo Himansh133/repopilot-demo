@@ -30,9 +30,13 @@ class Quote:
 
 def quote(cart, coupons=()):
     subtotal = cart.subtotal()
-    discount = sum((discount_for(c, subtotal) for c in coupons), ZERO)
-    discount = min(discount, subtotal)
-    after_discount = subtotal - discount
+    discount = ZERO
+    remaining = subtotal
+    for c in coupons:
+        off = discount_for(c, remaining)
+        discount += off
+        remaining -= off
+    after_discount = remaining
     tax = to_money(after_discount * TAX_RATE)
-    shipping = ZERO if subtotal >= FREE_SHIPPING_FROM else SHIPPING_FEE
+    shipping = ZERO if remaining >= FREE_SHIPPING_FROM else SHIPPING_FEE
     return Quote(subtotal, discount, tax, shipping, after_discount + tax + shipping)
